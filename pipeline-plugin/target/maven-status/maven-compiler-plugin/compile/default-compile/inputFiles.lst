@@ -1,0 +1,6 @@
+/home/sdenboer/code/scriptie/Common/pipeline-plugin/src/main/java/com/pipelinepowertool/common/pipelineplugin/csv/EnergyReadingCSVRecord.java
+/home/sdenboer/code/scriptie/Common/pipeline-plugin/src/main/java/com/pipelinepowertool/common/pipelineplugin/exceptions/NoReadingFoundException.java
+/home/sdenboer/code/scriptie/Common/pipeline-plugin/src/main/java/com/pipelinepowertool/common/pipelineplugin/energy_meter/EnergyMeterServiceImpl.java
+/home/sdenboer/code/scriptie/Common/pipeline-plugin/src/main/java/com/pipelinepowertool/common/pipelineplugin/energy_meter/EnergyMeterService.java
+/home/sdenboer/code/scriptie/Common/pipeline-plugin/src/main/java/com/pipelinepowertool/common/pipelineplugin/csv/CsvServiceImpl.java
+/home/sdenboer/code/scriptie/Common/pipeline-plugin/src/main/java/com/pipelinepowertool/common/pipelineplugin/csv/CsvService.java

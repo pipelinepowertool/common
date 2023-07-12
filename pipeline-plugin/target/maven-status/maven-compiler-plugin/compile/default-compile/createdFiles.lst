@@ -1,0 +1,6 @@
+com/pipelinepowertool/common/pipelineplugin/energy_meter/EnergyMeterService.class
+com/pipelinepowertool/common/pipelineplugin/exceptions/NoReadingFoundException.class
+com/pipelinepowertool/common/pipelineplugin/energy_meter/EnergyMeterServiceImpl.class
+com/pipelinepowertool/common/pipelineplugin/csv/CsvServiceImpl.class
+com/pipelinepowertool/common/pipelineplugin/csv/CsvService.class
+com/pipelinepowertool/common/pipelineplugin/csv/EnergyReadingCSVRecord.class
