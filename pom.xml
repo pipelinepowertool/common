@@ -6,7 +6,7 @@
 
   <groupId>com.pipelinepowertool</groupId>
   <artifactId>common</artifactId>
-  <version>1.0</version>
+  <version>1.0.0</version>
   <packaging>pom</packaging>
 
   <modules>
@@ -28,8 +28,8 @@
     </dependency>
 
     <dependency>
-      <groupId>com.example</groupId>
-      <artifactId>tutorial-core</artifactId>
+      <groupId>com.pipelinepowertool</groupId>
+      <artifactId>common</artifactId>
       <version>1.0.0</version>
     </dependency>
   </dependencies>
