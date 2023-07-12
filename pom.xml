@@ -26,6 +26,12 @@
       <version>RELEASE</version>
       <scope>test</scope>
     </dependency>
+
+    <dependency>
+      <groupId>com.example</groupId>
+      <artifactId>tutorial-core</artifactId>
+      <version>1.0.0</version>
+    </dependency>
   </dependencies>
 
   <distributionManagement>
