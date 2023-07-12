@@ -28,11 +28,4 @@
     </dependency>
   </dependencies>
 
-  <distributionManagement>
-    <repository>
-      <id>github</id>
-      <name>GitHub sdenboer Apache Maven Packages</name>
-      <url>https://maven.pkg.github.com/sdenboer/REPOSITORY</url>
-    </repository>
-  </distributionManagement>
 </project>
