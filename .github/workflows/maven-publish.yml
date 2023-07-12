@@ -8,7 +8,10 @@ jobs:
   build:
     runs-on: ubuntu-latest
     permissions:
+      actions: read
       packages: write
+      contents: read
+      repository-projects: read
     steps:
       - uses: actions/checkout@v2
       - name: Set up Java 11
