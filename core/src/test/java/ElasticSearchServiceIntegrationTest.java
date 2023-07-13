@@ -1,16 +1,21 @@
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import co.elastic.clients.elasticsearch._types.HealthStatus;
 import com.pipelinepowertool.common.core.database.EnergyReading;
 import com.pipelinepowertool.common.core.database.EnergyReadingRecord;
 import com.pipelinepowertool.common.core.database.elasticsearch.ElasticSearchService;
 import com.pipelinepowertool.common.core.database.models.DatabaseAggregationResponse;
+import com.pipelinepowertool.common.core.database.models.DatabaseHealthCheckResponse;
 import com.pipelinepowertool.common.core.database.models.DatabaseInsertResponse;
 import com.pipelinepowertool.common.core.pipeline.jenkins.JenkinsMetadata;
 import java.io.InputStream;
 import java.math.BigDecimal;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
@@ -76,6 +81,17 @@ class ElasticSearchServiceIntegrationTest {
         assertEquals(2, elasticSearchAggregationResponse.getPipelineRuns());
         assertEquals(1.0, elasticSearchAggregationResponse.getUtilization().doubleValue());
         assertEquals(0.2, elasticSearchAggregationResponse.getWatts().doubleValue());
+    }
+
+    @Test
+    void test_jenkins_health() throws ExecutionException, InterruptedException {
+        Set<HealthStatus> statuses = Set.of(HealthStatus.Yellow, HealthStatus.Green);
+        CompletableFuture<DatabaseHealthCheckResponse> databaseHealthCheckResponseCompletableFuture = elasticSearchService.healthCheck();
+        Thread.sleep(2000);
+        String response = databaseHealthCheckResponseCompletableFuture.get().getValue();
+        HealthStatus healthStatus = Arrays.stream(HealthStatus.values())
+            .filter(status -> status.jsonValue().equals(response)).findFirst().orElse(null);
+        assertTrue(statuses.contains(healthStatus));
     }
 
     private static Stream<Arguments> provideStringsForIsBlank() {
