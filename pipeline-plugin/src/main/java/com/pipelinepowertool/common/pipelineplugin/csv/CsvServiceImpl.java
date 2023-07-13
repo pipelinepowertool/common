@@ -1,5 +1,7 @@
 package com.pipelinepowertool.common.pipelineplugin.csv;
 
+import static com.pipelinepowertool.common.pipelineplugin.utils.Constants.ENERGY_READINGS_CSV;
+
 import com.opencsv.bean.CsvToBeanBuilder;
 import com.pipelinepowertool.common.core.database.EnergyReading;
 import com.pipelinepowertool.common.pipelineplugin.exceptions.NoReadingFoundException;
@@ -14,7 +16,7 @@ public class CsvServiceImpl implements CsvService {
 
     @Override
     public EnergyReading aggregateReadings() throws FileNotFoundException {
-        File file = new File("EnergyReadings.csv");
+        File file = new File(ENERGY_READINGS_CSV);
         List<EnergyReadingCSVRecord> records = new CsvToBeanBuilder(
             new FileReader(file))
             .withType(EnergyReadingCSVRecord.class)
