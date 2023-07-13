@@ -13,7 +13,8 @@ import java.util.List;
 public class CsvServiceImpl implements CsvService {
 
     @Override
-    public EnergyReading aggregate(File file) throws FileNotFoundException {
+    public EnergyReading aggregateReadings() throws FileNotFoundException {
+        File file = new File("EnergyReadings.csv");
         List<EnergyReadingCSVRecord> records = new CsvToBeanBuilder(
             new FileReader(file))
             .withType(EnergyReadingCSVRecord.class)

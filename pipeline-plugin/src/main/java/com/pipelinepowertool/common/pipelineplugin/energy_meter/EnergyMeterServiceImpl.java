@@ -7,13 +7,16 @@ import java.net.URL;
 import java.nio.channels.Channels;
 import java.nio.channels.FileChannel;
 import java.nio.channels.ReadableByteChannel;
+import java.util.concurrent.atomic.AtomicReference;
 
 public class EnergyMeterServiceImpl implements EnergyMeterService {
 
     private static final String ENERGY_READER_URL = "https://energy-reader.s3.eu-north-1.amazonaws.com/energy_reader";
 
+    private final AtomicReference<Process> process = new AtomicReference<>();
+
     @Override
-    public File download() throws IOException {
+    public void start() throws IOException {
         URL url = new URL(ENERGY_READER_URL);
         try (ReadableByteChannel readableByteChannel = Channels.newChannel(url.openStream());
             FileOutputStream fileOutputStream = new FileOutputStream("energy_reader");
@@ -22,13 +25,13 @@ public class EnergyMeterServiceImpl implements EnergyMeterService {
         }
         File file = new File("energy_reader");
         file.setExecutable(true);
-        return file;
+        ProcessBuilder pb = new ProcessBuilder(file.getAbsolutePath());
+        pb.directory(file.getParentFile());
+        process.set(pb.start());
     }
 
     @Override
-    public Process start(File file) throws IOException {
-        ProcessBuilder pb = new ProcessBuilder(file.getAbsolutePath());
-        pb.directory(file.getParentFile());
-        return pb.start();
+    public void stop() {
+        process.get().destroy();
     }
 }

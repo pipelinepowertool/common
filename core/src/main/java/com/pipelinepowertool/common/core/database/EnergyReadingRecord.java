@@ -4,11 +4,9 @@ import com.pipelinepowertool.common.core.pipeline.PipelineMetadata;
 
 public class EnergyReadingRecord {
 
-    private EnergyReading data;
+    private final EnergyReading data;
 
-    private PipelineMetadata metadata;
-
-    public EnergyReadingRecord() {}
+    private final PipelineMetadata metadata;
 
     public EnergyReadingRecord(EnergyReading data,
         PipelineMetadata metadata) {

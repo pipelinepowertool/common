@@ -5,7 +5,7 @@ import java.io.IOException;
 
 public interface EnergyMeterService {
 
-    File download() throws IOException;
+    void start() throws IOException;
 
-    Process start(File file) throws IOException;
+    void stop();
 }
