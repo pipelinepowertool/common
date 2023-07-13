@@ -7,7 +7,7 @@
   <parent>
     <artifactId>common</artifactId>
     <groupId>com.pipelinepowertool</groupId>
-    <version>1.0.5</version>
+    <version>1.0.7</version>
   </parent>
   <packaging>jar</packaging>
 

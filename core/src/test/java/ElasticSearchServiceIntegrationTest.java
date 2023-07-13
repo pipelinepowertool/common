@@ -1,12 +1,10 @@
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-import co.elastic.clients.elasticsearch.core.BulkResponse;
-import co.elastic.clients.elasticsearch.core.IndexResponse;
-import co.elastic.clients.elasticsearch.core.SearchResponse;
 import com.pipelinepowertool.common.core.database.EnergyReading;
 import com.pipelinepowertool.common.core.database.EnergyReadingRecord;
-import com.pipelinepowertool.common.core.database.elasticsearch.AggregatedEnergyReading;
 import com.pipelinepowertool.common.core.database.elasticsearch.ElasticSearchService;
+import com.pipelinepowertool.common.core.database.models.DatabaseAggregationResponse;
+import com.pipelinepowertool.common.core.database.models.DatabaseInsertResponse;
 import com.pipelinepowertool.common.core.pipeline.jenkins.JenkinsMetadata;
 import java.io.InputStream;
 import java.math.BigDecimal;
@@ -55,10 +53,10 @@ class ElasticSearchServiceIntegrationTest {
     void test_jenkins_index() throws ExecutionException, InterruptedException, TimeoutException {
         List<EnergyReadingRecord> energyReadingRecords = createTestRecords(1, 1, 1);
         assertEquals(1, energyReadingRecords.size());
-        CompletableFuture<IndexResponse> responseInFuture = elasticSearchService.send(
+        CompletableFuture<DatabaseInsertResponse> responseInFuture = elasticSearchService.send(
             energyReadingRecords.get(0));
-        IndexResponse response = responseInFuture.get(10, TimeUnit.SECONDS);
-        assertEquals("created", response.result().jsonValue());
+        DatabaseInsertResponse response = responseInFuture.get(10, TimeUnit.SECONDS);
+        assertEquals("created", response.getStatus());
 
     }
 
@@ -69,16 +67,15 @@ class ElasticSearchServiceIntegrationTest {
         insertTestRecords(energyReadingRecords);
 
         JenkinsMetadata jenkinsMetadata = new JenkinsMetadata(null, null, null, null, null);
-        CompletableFuture<SearchResponse<Void>> responseInFuture = elasticSearchService.aggregate(
+        CompletableFuture<DatabaseAggregationResponse> responseInFuture = elasticSearchService.aggregate(
             jenkinsMetadata);
         Thread.sleep(2000);
-        AggregatedEnergyReading aggregatedEnergyReading = new AggregatedEnergyReading(
-            responseInFuture.get());
+        DatabaseAggregationResponse elasticSearchAggregationResponse = responseInFuture.get();
 
-        assertEquals(120, aggregatedEnergyReading.getRuntime());
-        assertEquals(2, aggregatedEnergyReading.getPipelineRuns());
-        assertEquals(1.0, aggregatedEnergyReading.getUtilization().doubleValue());
-        assertEquals(0.2, aggregatedEnergyReading.getWatts().doubleValue());
+        assertEquals(120, elasticSearchAggregationResponse.getRuntime());
+        assertEquals(2, elasticSearchAggregationResponse.getPipelineRuns());
+        assertEquals(1.0, elasticSearchAggregationResponse.getUtilization().doubleValue());
+        assertEquals(0.2, elasticSearchAggregationResponse.getWatts().doubleValue());
     }
 
     private static Stream<Arguments> provideStringsForIsBlank() {
@@ -91,8 +88,7 @@ class ElasticSearchServiceIntegrationTest {
 
     private void insertTestRecords(List<EnergyReadingRecord> energyReadingRecords)
         throws InterruptedException {
-        CompletableFuture<BulkResponse> indexResponseInFuture = elasticSearchService.send(
-            energyReadingRecords);
+        elasticSearchService.send(energyReadingRecords);
         Thread.sleep(2000);
     }
 

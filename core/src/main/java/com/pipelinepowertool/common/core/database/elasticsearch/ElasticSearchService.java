@@ -12,10 +12,7 @@ import co.elastic.clients.elasticsearch._types.aggregations.Aggregation;
 import co.elastic.clients.elasticsearch._types.aggregations.AggregationBuilders;
 import co.elastic.clients.elasticsearch.core.BulkRequest;
 import co.elastic.clients.elasticsearch.core.BulkRequest.Builder;
-import co.elastic.clients.elasticsearch.core.BulkResponse;
 import co.elastic.clients.elasticsearch.core.IndexRequest;
-import co.elastic.clients.elasticsearch.core.IndexResponse;
-import co.elastic.clients.elasticsearch.core.SearchResponse;
 import co.elastic.clients.json.jackson.JacksonJsonpMapper;
 import co.elastic.clients.transport.ElasticsearchTransport;
 import co.elastic.clients.transport.rest_client.RestClientTransport;
@@ -26,12 +23,16 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.pipelinepowertool.common.core.database.DatabaseService;
 import com.pipelinepowertool.common.core.database.EnergyReadingRecord;
+import com.pipelinepowertool.common.core.database.models.DatabaseAggregationResponse;
+import com.pipelinepowertool.common.core.database.models.DatabaseHealthCheckResponse;
+import com.pipelinepowertool.common.core.database.models.DatabaseInsertResponse;
 import com.pipelinepowertool.common.core.pipeline.PipelineMetadata;
 import com.pipelinepowertool.common.core.utils.SslUtils;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
+import java.util.stream.Collectors;
 import org.apache.http.HttpHost;
 import org.apache.http.auth.AuthScope;
 import org.apache.http.auth.UsernamePasswordCredentials;
@@ -85,25 +86,34 @@ public class ElasticSearchService implements DatabaseService {
     }
 
     @Override
-    public CompletableFuture<IndexResponse> send(EnergyReadingRecord readingRecord) {
+    public CompletableFuture<DatabaseHealthCheckResponse> healthCheck() {
+        return esClient
+            .cluster()
+            .health()
+            .thenApply(r -> new DatabaseHealthCheckResponse(r.status().jsonValue()));
+    }
+
+    @Override
+    public CompletableFuture<DatabaseInsertResponse> send(EnergyReadingRecord readingRecord) {
         IndexRequest<EnergyReadingRecord> request = IndexRequest.of(i -> i
             .index(INDEX)
             .document(readingRecord)
         );
-        return esClient.index(request);
+        return esClient.index(request).thenApply(r -> new DatabaseInsertResponse(r.result().jsonValue()));
     }
 
     @Override
-    public CompletableFuture<BulkResponse> send(List<EnergyReadingRecord> readingRecords) {
+    public CompletableFuture<List<DatabaseInsertResponse>> send(List<EnergyReadingRecord> readingRecords) {
         BulkRequest.Builder br = new Builder();
         for (EnergyReadingRecord readingRecord : readingRecords) {
             br.operations(op -> op.index(idx -> idx.index(INDEX).document(readingRecord)));
         }
-        return esClient.bulk(br.build());
+        return esClient.bulk(br.build()).thenApply(r -> r.items().stream().map(i -> new DatabaseInsertResponse(i.result())).collect(
+            Collectors.toList()));
     }
 
     @Override
-    public CompletableFuture<SearchResponse<Void>> aggregate(PipelineMetadata pipelineMetadata) {
+    public CompletableFuture<DatabaseAggregationResponse> aggregate(PipelineMetadata pipelineMetadata) {
 
         return esClient.search(s -> s
                 .index(INDEX)
@@ -113,7 +123,7 @@ public class ElasticSearchService implements DatabaseService {
 
 
             , Void.class
-        );
+        ).thenApply(ElasticSearchAggregationResponse::new);
 
     }
 
