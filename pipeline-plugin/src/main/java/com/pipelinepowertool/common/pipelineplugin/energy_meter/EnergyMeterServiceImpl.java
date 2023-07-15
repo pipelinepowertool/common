@@ -1,6 +1,7 @@
 package com.pipelinepowertool.common.pipelineplugin.energy_meter;
 
 import static com.pipelinepowertool.common.pipelineplugin.utils.Constants.ENERGY_READER_FILENAME;
+import static com.pipelinepowertool.common.pipelineplugin.utils.Constants.ENERGY_READER_FOLDER;
 import static com.pipelinepowertool.common.pipelineplugin.utils.Constants.ENERGY_READER_URL_DEFAULT;
 import static com.pipelinepowertool.common.pipelineplugin.utils.Constants.ENERGY_READER_URL_JENKINS_ALPINE;
 
@@ -30,11 +31,11 @@ public class EnergyMeterServiceImpl implements EnergyMeterService {
                 ? ENERGY_READER_URL_JENKINS_ALPINE
                 : ENERGY_READER_URL_DEFAULT);
         try (ReadableByteChannel readableByteChannel = Channels.newChannel(url.openStream());
-            FileOutputStream fileOutputStream = new FileOutputStream(ENERGY_READER_FILENAME);
+            FileOutputStream fileOutputStream = new FileOutputStream(ENERGY_READER_FOLDER + ENERGY_READER_FILENAME);
             FileChannel channel = fileOutputStream.getChannel()) {
             channel.transferFrom(readableByteChannel, 0, Long.MAX_VALUE);
         }
-        File file = new File(ENERGY_READER_FILENAME);
+        File file = new File(ENERGY_READER_FOLDER + ENERGY_READER_FILENAME);
         file.setExecutable(true);
         ProcessBuilder pb = new ProcessBuilder(file.getAbsolutePath());
         pb.directory(file.getParentFile());
