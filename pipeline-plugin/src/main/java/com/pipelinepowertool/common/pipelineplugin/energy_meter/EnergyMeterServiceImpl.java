@@ -38,11 +38,17 @@ public class EnergyMeterServiceImpl implements EnergyMeterService {
         file.setExecutable(true);
         ProcessBuilder pb = new ProcessBuilder(file.getAbsolutePath());
         pb.directory(file.getParentFile());
-        process.set(pb.start());
+        Process start = pb.start();
+        System.out.println("Process started");
+        process.set(start);
     }
 
     @Override
     public void stop() {
+        if (process.get() == null) {
+            System.out.println("Something went wrong. Process cannot be found");
+            return;
+        }
         process.get().destroy();
     }
 
