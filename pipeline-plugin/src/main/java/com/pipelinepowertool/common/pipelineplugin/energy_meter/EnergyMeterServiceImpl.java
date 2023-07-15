@@ -55,8 +55,8 @@ public class EnergyMeterServiceImpl implements EnergyMeterService {
     private String getOsRelease() {
         String osRelease = null;
         try {
-            Process process = Runtime.getRuntime().exec("cat /etc/*-release");
-            BufferedReader r = new BufferedReader(new InputStreamReader(process.getInputStream()));
+            Process release = Runtime.getRuntime().exec("cat /etc/os-release");
+            BufferedReader r = new BufferedReader(new InputStreamReader(release.getInputStream()));
             String line;
             while ((line = r.readLine()) != null) {
                 if (line.contains("NAME=")) {
