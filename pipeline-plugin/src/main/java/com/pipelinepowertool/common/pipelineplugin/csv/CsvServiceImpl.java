@@ -44,13 +44,5 @@ public class CsvServiceImpl implements CsvService {
         return new EnergyReading(watts, averageUtilization);
     }
 
-    @Override
-    public String convertAggregateToJson(EnergyReading energyReading,
-        PipelineMetadata jenkinsMetadata) throws JsonProcessingException {
-        EnergyReadingRecord readingRecord = new EnergyReadingRecord(energyReading, jenkinsMetadata);
-        ObjectMapper objectMapper = new ObjectMapper();
-        return objectMapper.writeValueAsString(readingRecord);
-    }
-
 
 }

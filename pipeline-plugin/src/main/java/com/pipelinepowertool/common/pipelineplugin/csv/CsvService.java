@@ -10,5 +10,5 @@ import java.io.FileNotFoundException;
 public interface CsvService {
 
     EnergyReading aggregateReadings(File file) throws FileNotFoundException;
-    String convertAggregateToJson(EnergyReading energyReading, PipelineMetadata jenkinsMetadata) throws JsonProcessingException;
+
 }
