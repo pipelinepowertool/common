@@ -1,17 +1,17 @@
 package com.pipelinepowertool.common.pipelineplugin.csv;
 
-import com.opencsv.bean.CsvBindByPosition;
+import com.opencsv.bean.CsvBindByName;
 import java.math.BigDecimal;
 
-class EnergyReadingCSVRecord {
+public class EnergyReadingCSVRecord {
 
-    @CsvBindByPosition(position = 0)
+    @CsvBindByName(column = "PID")
     private Integer pid;
 
-    @CsvBindByPosition(position = 1)
+    @CsvBindByName(column = "Joules")
     private BigDecimal watts;
 
-    @CsvBindByPosition(position = 2)
+    @CsvBindByName(column = "Utilization")
     private BigDecimal utilization;
 
     public Integer getPid() {
