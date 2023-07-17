@@ -37,6 +37,7 @@ import org.apache.http.HttpHost;
 import org.apache.http.auth.AuthScope;
 import org.apache.http.auth.UsernamePasswordCredentials;
 import org.apache.http.client.CredentialsProvider;
+import org.apache.http.conn.ssl.NoopHostnameVerifier;
 import org.apache.http.impl.client.BasicCredentialsProvider;
 import org.elasticsearch.client.Node;
 import org.elasticsearch.client.NodeSelector;
@@ -70,7 +71,8 @@ public class ElasticSearchService implements DatabaseService {
             .setHttpClientConfigCallback(
                 httpClientBuilder -> httpClientBuilder
                     .setSSLContext(SslUtils.createContextFromCaCert(certAsBytes))
-                    .setDefaultCredentialsProvider(credentialsProvider))
+                    .setDefaultCredentialsProvider(credentialsProvider)
+                    .setSSLHostnameVerifier(NoopHostnameVerifier.INSTANCE))
             .setNodeSelector(INGEST_NODE_SELECTOR)
             .build();
         ObjectMapper mapper = new ObjectMapper();
