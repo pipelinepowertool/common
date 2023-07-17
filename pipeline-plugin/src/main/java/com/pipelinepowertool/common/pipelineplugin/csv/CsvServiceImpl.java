@@ -4,6 +4,9 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.opencsv.bean.CsvToBeanBuilder;
 import com.pipelinepowertool.common.core.database.EnergyReading;
+import com.pipelinepowertool.common.core.database.EnergyReadingRecord;
+import com.pipelinepowertool.common.core.pipeline.PipelineMetadata;
+import com.pipelinepowertool.common.core.pipeline.jenkins.JenkinsMetadata;
 import com.pipelinepowertool.common.pipelineplugin.exceptions.NoReadingFoundException;
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -42,9 +45,11 @@ public class CsvServiceImpl implements CsvService {
     }
 
     @Override
-    public String convertAggregateToJson(EnergyReading energyReading) throws JsonProcessingException {
+    public String convertAggregateToJson(EnergyReading energyReading,
+        PipelineMetadata jenkinsMetadata) throws JsonProcessingException {
+        EnergyReadingRecord readingRecord = new EnergyReadingRecord(energyReading, jenkinsMetadata);
         ObjectMapper objectMapper = new ObjectMapper();
-        return objectMapper.writeValueAsString(energyReading);
+        return objectMapper.writeValueAsString(readingRecord);
     }
 
 
