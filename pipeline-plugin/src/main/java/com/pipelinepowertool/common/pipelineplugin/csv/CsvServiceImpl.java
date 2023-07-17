@@ -1,7 +1,7 @@
 package com.pipelinepowertool.common.pipelineplugin.csv;
 
-import static com.pipelinepowertool.common.pipelineplugin.utils.Constants.ENERGY_READINGS_CSV;
-
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.opencsv.bean.CsvToBeanBuilder;
 import com.pipelinepowertool.common.core.database.EnergyReading;
 import com.pipelinepowertool.common.pipelineplugin.exceptions.NoReadingFoundException;
@@ -15,8 +15,7 @@ import java.util.List;
 public class CsvServiceImpl implements CsvService {
 
     @Override
-    public EnergyReading aggregateReadings() throws FileNotFoundException {
-        File file = new File(ENERGY_READINGS_CSV);
+    public EnergyReading aggregateReadings(File file) throws FileNotFoundException {
         List<EnergyReadingCSVRecord> records = new CsvToBeanBuilder(
             new FileReader(file))
             .withType(EnergyReadingCSVRecord.class)
@@ -40,6 +39,12 @@ public class CsvServiceImpl implements CsvService {
             .divide(new BigDecimal(records.size()), RoundingMode.HALF_UP);
 
         return new EnergyReading(watts, averageUtilization);
+    }
+
+    @Override
+    public String convertAggregateToJson(EnergyReading energyReading) throws JsonProcessingException {
+        ObjectMapper objectMapper = new ObjectMapper();
+        return objectMapper.writeValueAsString(energyReading);
     }
 
 
