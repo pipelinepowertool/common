@@ -1,12 +1,5 @@
 package com.pipelinepowertool.common.core.database.elasticsearch;
 
-import static com.pipelinepowertool.common.core.utils.ElasticSearchConstants.FIELD_RUNTIME;
-import static com.pipelinepowertool.common.core.utils.ElasticSearchConstants.FIELD_UTILIZATION;
-import static com.pipelinepowertool.common.core.utils.ElasticSearchConstants.FIELD_WATTS;
-import static com.pipelinepowertool.common.core.utils.ElasticSearchConstants.INDEX;
-import static com.pipelinepowertool.common.core.utils.ElasticSearchConstants.NODE_DATA;
-import static com.pipelinepowertool.common.core.utils.ElasticSearchConstants.NODE_METADATA;
-
 import co.elastic.clients.elasticsearch.ElasticsearchAsyncClient;
 import co.elastic.clients.elasticsearch._types.aggregations.Aggregation;
 import co.elastic.clients.elasticsearch._types.aggregations.AggregationBuilders;
@@ -28,11 +21,6 @@ import com.pipelinepowertool.common.core.database.models.DatabaseHealthCheckResp
 import com.pipelinepowertool.common.core.database.models.DatabaseInsertResponse;
 import com.pipelinepowertool.common.core.pipeline.PipelineMetadata;
 import com.pipelinepowertool.common.core.utils.SslUtils;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.CompletableFuture;
-import java.util.stream.Collectors;
 import org.apache.http.HttpHost;
 import org.apache.http.auth.AuthScope;
 import org.apache.http.auth.UsernamePasswordCredentials;
@@ -42,6 +30,14 @@ import org.apache.http.impl.client.BasicCredentialsProvider;
 import org.elasticsearch.client.Node;
 import org.elasticsearch.client.NodeSelector;
 import org.elasticsearch.client.RestClient;
+
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.CompletableFuture;
+import java.util.stream.Collectors;
+
+import static com.pipelinepowertool.common.core.utils.ElasticSearchConstants.*;
 
 public class ElasticSearchService implements DatabaseService {
 
@@ -59,22 +55,22 @@ public class ElasticSearchService implements DatabaseService {
     };
 
     public ElasticSearchService(String userName, String password, byte[] certAsBytes,
-        HttpHost host) {
+                                HttpHost host) {
         final CredentialsProvider credentialsProvider = new BasicCredentialsProvider();
         credentialsProvider.setCredentials(
-            AuthScope.ANY,
-            new UsernamePasswordCredentials(userName, password)
+                AuthScope.ANY,
+                new UsernamePasswordCredentials(userName, password)
         );
 
         RestClient restClient = RestClient
-            .builder(host)
-            .setHttpClientConfigCallback(
-                httpClientBuilder -> httpClientBuilder
-                    .setSSLContext(SslUtils.createContextFromCaCert(certAsBytes))
-                    .setDefaultCredentialsProvider(credentialsProvider)
-                    .setSSLHostnameVerifier(NoopHostnameVerifier.INSTANCE))
-            .setNodeSelector(INGEST_NODE_SELECTOR)
-            .build();
+                .builder(host)
+                .setHttpClientConfigCallback(
+                        httpClientBuilder -> httpClientBuilder
+                                .setSSLContext(SslUtils.createContextFromCaCert(certAsBytes))
+                                .setDefaultCredentialsProvider(credentialsProvider)
+                                .setSSLHostnameVerifier(NoopHostnameVerifier.INSTANCE))
+                .setNodeSelector(INGEST_NODE_SELECTOR)
+                .build();
         ObjectMapper mapper = new ObjectMapper();
         mapper.setPropertyNamingStrategy(PropertyNamingStrategies.SNAKE_CASE);
         mapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
@@ -82,7 +78,7 @@ public class ElasticSearchService implements DatabaseService {
         mapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
         JacksonJsonpMapper jsonMapper = new JacksonJsonpMapper(mapper);
         ElasticsearchTransport elasticsearchTransport =
-            new RestClientTransport(restClient, jsonMapper);
+                new RestClientTransport(restClient, jsonMapper);
         esClient = new ElasticsearchAsyncClient(elasticsearchTransport);
 
     }
@@ -90,16 +86,16 @@ public class ElasticSearchService implements DatabaseService {
     @Override
     public CompletableFuture<DatabaseHealthCheckResponse> healthCheck() {
         return esClient
-            .cluster()
-            .health()
-            .thenApply(r -> new DatabaseHealthCheckResponse(r.status().jsonValue()));
+                .cluster()
+                .health()
+                .thenApply(r -> new DatabaseHealthCheckResponse(r.status().jsonValue()));
     }
 
     @Override
     public CompletableFuture<DatabaseInsertResponse> send(EnergyReadingRecord readingRecord) {
         IndexRequest<EnergyReadingRecord> request = IndexRequest.of(i -> i
-            .index(INDEX)
-            .document(readingRecord)
+                .index(INDEX)
+                .document(readingRecord)
         );
         return esClient.index(request).thenApply(r -> new DatabaseInsertResponse(r.result().jsonValue()));
     }
@@ -111,32 +107,30 @@ public class ElasticSearchService implements DatabaseService {
             br.operations(op -> op.index(idx -> idx.index(INDEX).document(readingRecord)));
         }
         return esClient.bulk(br.build()).thenApply(r -> r.items().stream().map(i -> new DatabaseInsertResponse(i.result())).collect(
-            Collectors.toList()));
+                Collectors.toList()));
     }
 
     @Override
     public CompletableFuture<DatabaseAggregationResponse> aggregate(PipelineMetadata pipelineMetadata) {
 
         return esClient.search(s -> s
-                .index(INDEX)
-                .size(0)
-                .query(ElasticSearchQuery.createQuery(pipelineMetadata))
-                .aggregations(aggregationMap())
+                        .index(INDEX)
+                        .size(0)
+                        .query(ElasticSearchQuery.createQuery(pipelineMetadata))
+                        .aggregations(aggregationMap())
 
 
-            , Void.class
+                , Void.class
         ).thenApply(ElasticSearchAggregationResponse::new);
 
     }
 
     private Map<String, Aggregation> aggregationMap() {
         return Map.of(
-            FIELD_RUNTIME, AggregationBuilders.sum().field(NODE_METADATA + "." + FIELD_RUNTIME).build()._toAggregation(),
-            FIELD_WATTS, AggregationBuilders.sum().field(NODE_DATA + "." + FIELD_WATTS).build()._toAggregation(),
-            FIELD_UTILIZATION, AggregationBuilders.avg().field(NODE_DATA + "." + FIELD_UTILIZATION).build()._toAggregation());
+                FIELD_RUNTIME, AggregationBuilders.sum().field(NODE_METADATA + "." + FIELD_RUNTIME).build()._toAggregation(),
+                FIELD_WATTS, AggregationBuilders.sum().field(NODE_DATA + "." + FIELD_WATTS).build()._toAggregation(),
+                FIELD_UTILIZATION, AggregationBuilders.avg().field(NODE_DATA + "." + FIELD_UTILIZATION).build()._toAggregation());
     }
-
-
 
 
 }

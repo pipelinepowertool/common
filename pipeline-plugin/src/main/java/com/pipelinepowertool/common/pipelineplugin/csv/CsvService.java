@@ -1,14 +1,12 @@
 package com.pipelinepowertool.common.pipelineplugin.csv;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.pipelinepowertool.common.core.database.EnergyReading;
-import com.pipelinepowertool.common.core.pipeline.PipelineMetadata;
-import com.pipelinepowertool.common.core.pipeline.jenkins.JenkinsMetadata;
-import java.io.File;
+
 import java.io.FileNotFoundException;
+import java.io.Reader;
 
 public interface CsvService {
 
-    EnergyReading aggregateReadings(File file) throws FileNotFoundException;
+    EnergyReading aggregateReadings(Reader reader) throws FileNotFoundException;
 
 }

@@ -9,7 +9,7 @@ public class EnergyReadingRecord {
     private final PipelineMetadata metadata;
 
     public EnergyReadingRecord(EnergyReading data,
-        PipelineMetadata metadata) {
+                               PipelineMetadata metadata) {
         this.data = data;
         this.metadata = metadata;
     }

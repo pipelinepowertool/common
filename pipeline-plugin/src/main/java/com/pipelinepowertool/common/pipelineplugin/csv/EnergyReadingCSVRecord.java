@@ -1,6 +1,7 @@
 package com.pipelinepowertool.common.pipelineplugin.csv;
 
 import com.opencsv.bean.CsvBindByName;
+
 import java.math.BigDecimal;
 
 public class EnergyReadingCSVRecord {

@@ -1,12 +1,13 @@
 package com.pipelinepowertool.common.core.utils;
 
+import org.apache.http.ssl.SSLContextBuilder;
+import org.apache.http.ssl.SSLContexts;
+
+import javax.net.ssl.SSLContext;
 import java.io.ByteArrayInputStream;
 import java.security.KeyStore;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateFactory;
-import javax.net.ssl.SSLContext;
-import org.apache.http.ssl.SSLContextBuilder;
-import org.apache.http.ssl.SSLContexts;
 
 public class SslUtils {
 
@@ -14,13 +15,13 @@ public class SslUtils {
         try {
             CertificateFactory factory = CertificateFactory.getInstance("X.509");
             Certificate trustedCa = factory.generateCertificate(
-                new ByteArrayInputStream(certAsBytes)
+                    new ByteArrayInputStream(certAsBytes)
             );
             KeyStore trustStore = KeyStore.getInstance("pkcs12");
             trustStore.load(null, null);
             trustStore.setCertificateEntry("ca", trustedCa);
             SSLContextBuilder sslContextBuilder =
-                SSLContexts.custom().loadTrustMaterial(trustStore, null);
+                    SSLContexts.custom().loadTrustMaterial(trustStore, null);
             return sslContextBuilder.build();
         } catch (Exception e) {
             throw new RuntimeException(e);

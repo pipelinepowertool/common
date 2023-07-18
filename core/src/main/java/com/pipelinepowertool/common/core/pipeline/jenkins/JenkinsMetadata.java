@@ -2,6 +2,7 @@ package com.pipelinepowertool.common.core.pipeline.jenkins;
 
 import com.pipelinepowertool.common.core.pipeline.Pipeline;
 import com.pipelinepowertool.common.core.pipeline.PipelineMetadata;
+
 import java.time.OffsetDateTime;
 
 public class JenkinsMetadata extends PipelineMetadata {
@@ -13,7 +14,7 @@ public class JenkinsMetadata extends PipelineMetadata {
     private final Long buildNumber;
 
     public JenkinsMetadata(String job, String branch, Long buildNumber,
-        OffsetDateTime startTime, OffsetDateTime endTime) {
+                           OffsetDateTime startTime, OffsetDateTime endTime) {
         super(pipeline, startTime, endTime);
         this.job = job;
         this.branch = branch;

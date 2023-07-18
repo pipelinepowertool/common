@@ -9,7 +9,7 @@ public abstract class DatabaseAggregationResponse {
     private final BigDecimal utilization;
 
     public DatabaseAggregationResponse(long runtime, long pipelineRuns, BigDecimal watts,
-        BigDecimal utilization) {
+                                       BigDecimal utilization) {
         this.runtime = runtime;
         this.pipelineRuns = pipelineRuns;
         this.watts = watts;

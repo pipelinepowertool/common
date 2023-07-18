@@ -1,6 +1,7 @@
 package com.pipelinepowertool.common.core.pipeline;
 
 import com.pipelinepowertool.common.core.utils.TimeUtils;
+
 import java.time.OffsetDateTime;
 
 public abstract class PipelineMetadata {
