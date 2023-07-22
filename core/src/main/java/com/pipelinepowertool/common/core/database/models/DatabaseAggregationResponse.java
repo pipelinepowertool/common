@@ -5,14 +5,14 @@ import java.math.BigDecimal;
 public abstract class DatabaseAggregationResponse {
     private final long runtime;
     private final long pipelineRuns;
-    private final BigDecimal watts;
+    private final BigDecimal joules;
     private final BigDecimal utilization;
 
-    public DatabaseAggregationResponse(long runtime, long pipelineRuns, BigDecimal watts,
-                                       BigDecimal utilization) {
+    protected DatabaseAggregationResponse(long runtime, long pipelineRuns, BigDecimal joules,
+                                          BigDecimal utilization) {
         this.runtime = runtime;
         this.pipelineRuns = pipelineRuns;
-        this.watts = watts;
+        this.joules = joules;
         this.utilization = utilization;
     }
 
@@ -24,8 +24,8 @@ public abstract class DatabaseAggregationResponse {
         return pipelineRuns;
     }
 
-    public BigDecimal getWatts() {
-        return watts;
+    public BigDecimal getJoules() {
+        return joules;
     }
 
     public BigDecimal getUtilization() {

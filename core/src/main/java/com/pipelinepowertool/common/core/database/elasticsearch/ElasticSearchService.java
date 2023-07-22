@@ -3,9 +3,12 @@ package com.pipelinepowertool.common.core.database.elasticsearch;
 import co.elastic.clients.elasticsearch.ElasticsearchAsyncClient;
 import co.elastic.clients.elasticsearch._types.aggregations.Aggregation;
 import co.elastic.clients.elasticsearch._types.aggregations.AggregationBuilders;
+import co.elastic.clients.elasticsearch._types.query_dsl.Query;
 import co.elastic.clients.elasticsearch.core.BulkRequest;
 import co.elastic.clients.elasticsearch.core.BulkRequest.Builder;
+import co.elastic.clients.elasticsearch.core.CountResponse;
 import co.elastic.clients.elasticsearch.core.IndexRequest;
+import co.elastic.clients.elasticsearch.core.SearchResponse;
 import co.elastic.clients.json.jackson.JacksonJsonpMapper;
 import co.elastic.clients.transport.ElasticsearchTransport;
 import co.elastic.clients.transport.rest_client.RestClientTransport;
@@ -25,7 +28,6 @@ import org.apache.http.HttpHost;
 import org.apache.http.auth.AuthScope;
 import org.apache.http.auth.UsernamePasswordCredentials;
 import org.apache.http.client.CredentialsProvider;
-import org.apache.http.conn.ssl.NoopHostnameVerifier;
 import org.apache.http.impl.client.BasicCredentialsProvider;
 import org.elasticsearch.client.Node;
 import org.elasticsearch.client.NodeSelector;
@@ -54,6 +56,18 @@ public class ElasticSearchService implements DatabaseService {
         }
     };
 
+    public ElasticSearchService(HttpHost host) {
+
+        RestClient restClient = RestClient
+                .builder(host)
+                .setNodeSelector(INGEST_NODE_SELECTOR)
+                .build();
+        JacksonJsonpMapper jsonMapper = getJacksonJsonpMapper();
+        ElasticsearchTransport elasticsearchTransport =
+                new RestClientTransport(restClient, jsonMapper);
+        esClient = new ElasticsearchAsyncClient(elasticsearchTransport);
+    }
+
     public ElasticSearchService(String userName, String password, byte[] certAsBytes,
                                 HttpHost host) {
         final CredentialsProvider credentialsProvider = new BasicCredentialsProvider();
@@ -67,20 +81,22 @@ public class ElasticSearchService implements DatabaseService {
                 .setHttpClientConfigCallback(
                         httpClientBuilder -> httpClientBuilder
                                 .setSSLContext(SslUtils.createContextFromCaCert(certAsBytes))
-                                .setDefaultCredentialsProvider(credentialsProvider)
-                                .setSSLHostnameVerifier(NoopHostnameVerifier.INSTANCE))
+                                .setDefaultCredentialsProvider(credentialsProvider))
                 .setNodeSelector(INGEST_NODE_SELECTOR)
                 .build();
+        JacksonJsonpMapper jsonMapper = getJacksonJsonpMapper();
+        ElasticsearchTransport elasticsearchTransport =
+                new RestClientTransport(restClient, jsonMapper);
+        esClient = new ElasticsearchAsyncClient(elasticsearchTransport);
+    }
+
+    private static JacksonJsonpMapper getJacksonJsonpMapper() {
         ObjectMapper mapper = new ObjectMapper();
         mapper.setPropertyNamingStrategy(PropertyNamingStrategies.SNAKE_CASE);
         mapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
         mapper.registerModule(new JavaTimeModule());
         mapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
-        JacksonJsonpMapper jsonMapper = new JacksonJsonpMapper(mapper);
-        ElasticsearchTransport elasticsearchTransport =
-                new RestClientTransport(restClient, jsonMapper);
-        esClient = new ElasticsearchAsyncClient(elasticsearchTransport);
-
+        return new JacksonJsonpMapper(mapper);
     }
 
     @Override
@@ -112,23 +128,24 @@ public class ElasticSearchService implements DatabaseService {
 
     @Override
     public CompletableFuture<DatabaseAggregationResponse> aggregate(PipelineMetadata pipelineMetadata) {
-
-        return esClient.search(s -> s
+        Query query = ElasticSearchQuery.createQuery(pipelineMetadata);
+        CompletableFuture<CountResponse> count = esClient
+                .count(s -> s
                         .index(INDEX)
-                        .size(0)
-                        .query(ElasticSearchQuery.createQuery(pipelineMetadata))
-                        .aggregations(aggregationMap())
+                        .query(query));
 
-
-                , Void.class
-        ).thenApply(ElasticSearchAggregationResponse::new);
-
+        CompletableFuture<SearchResponse<Void>> search = esClient.search(s -> s
+                .index(INDEX)
+                .size(0)
+                .query(query)
+                .aggregations(aggregationMap()), Void.class);
+        return search.thenCombine(count, ElasticSearchAggregationResponse::new);
     }
 
     private Map<String, Aggregation> aggregationMap() {
         return Map.of(
                 FIELD_RUNTIME, AggregationBuilders.sum().field(NODE_METADATA + "." + FIELD_RUNTIME).build()._toAggregation(),
-                FIELD_WATTS, AggregationBuilders.sum().field(NODE_DATA + "." + FIELD_WATTS).build()._toAggregation(),
+                FIELD_JOULES, AggregationBuilders.sum().field(NODE_DATA + "." + FIELD_JOULES).build()._toAggregation(),
                 FIELD_UTILIZATION, AggregationBuilders.avg().field(NODE_DATA + "." + FIELD_UTILIZATION).build()._toAggregation());
     }
 

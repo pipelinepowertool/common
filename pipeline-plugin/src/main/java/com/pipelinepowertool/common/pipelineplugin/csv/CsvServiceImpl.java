@@ -26,8 +26,8 @@ public class CsvServiceImpl implements CsvService {
     }
 
     private EnergyReading aggregate(List<EnergyReadingCSVRecord> records) {
-        BigDecimal watts = records.stream()
-                .map(EnergyReadingCSVRecord::getWatts)
+        BigDecimal joules = records.stream()
+                .map(EnergyReadingCSVRecord::getJoules)
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
 
         BigDecimal averageUtilization = records.stream()
@@ -35,7 +35,7 @@ public class CsvServiceImpl implements CsvService {
                 .reduce(BigDecimal.ZERO, BigDecimal::add)
                 .divide(new BigDecimal(records.size()), RoundingMode.HALF_UP);
 
-        return new EnergyReading(watts, averageUtilization);
+        return new EnergyReading(joules, averageUtilization);
     }
 
 

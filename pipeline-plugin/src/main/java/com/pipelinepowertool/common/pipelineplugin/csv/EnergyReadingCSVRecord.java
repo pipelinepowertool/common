@@ -10,7 +10,7 @@ public class EnergyReadingCSVRecord {
     private Integer pid;
 
     @CsvBindByName(column = "Joules")
-    private BigDecimal watts;
+    private BigDecimal joules;
 
     @CsvBindByName(column = "Utilization")
     private BigDecimal utilization;
@@ -23,12 +23,12 @@ public class EnergyReadingCSVRecord {
         this.pid = pid;
     }
 
-    public BigDecimal getWatts() {
-        return watts;
+    public BigDecimal getJoules() {
+        return joules;
     }
 
-    public void setWatts(BigDecimal watts) {
-        this.watts = watts;
+    public void setJoules(BigDecimal joules) {
+        this.joules = joules;
     }
 
     public BigDecimal getUtilization() {
