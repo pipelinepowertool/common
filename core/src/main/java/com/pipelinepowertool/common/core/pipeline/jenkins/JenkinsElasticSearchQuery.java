@@ -1,32 +1,42 @@
 package com.pipelinepowertool.common.core.pipeline.jenkins;
 
+import co.elastic.clients.elasticsearch._types.query_dsl.BoolQuery;
 import co.elastic.clients.elasticsearch._types.query_dsl.MatchQuery;
-import co.elastic.clients.elasticsearch._types.query_dsl.MatchQuery.Builder;
 import co.elastic.clients.elasticsearch._types.query_dsl.Query;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class JenkinsElasticSearchQuery {
 
     public static Query get(JenkinsMetadata pipelineMetadata) {
-        MatchQuery.Builder builder = new Builder();
+        List<Query> queries = new ArrayList<>();
         String pipelineTool = pipelineMetadata.getPipelineTool();
         String job = pipelineMetadata.getJob();
         String branch = pipelineMetadata.getBranch();
         Long buildNumber = pipelineMetadata.getBuildNumber();
 
         if (pipelineTool != null) {
-            builder = builder.field("metadata.pipeline_tool").query(pipelineTool);
+            queries.add(createQuery("metadata.pipeline_tool", pipelineTool));
         }
         if (job != null) {
-            builder = builder.field("metadata.job").query(job);
+            queries.add(createQuery("metadata.job", job));
         }
         if (branch != null) {
-            builder = builder.field("metadata.branch").query(branch);
+            queries.add(createQuery("metadata.branch", branch));
         }
         if (buildNumber != null) {
-            builder = builder.field("metadata.build_number").query(buildNumber);
+            queries.add(createQuery("metadata.build_number", buildNumber));
         }
-        final MatchQuery.Builder matchQuery = builder;
-        return MatchQuery.of(m -> matchQuery)._toQuery();
+        return new BoolQuery.Builder().should(queries).build()._toQuery();
+    }
+
+    private static Query createQuery(String field, String value) {
+        return MatchQuery.of(builder -> builder.field(field).query(value))._toQuery();
+    }
+
+    private static Query createQuery(String field, Long value) {
+        return MatchQuery.of(builder -> builder.field(field).query(value))._toQuery();
     }
 
 
