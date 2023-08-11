@@ -28,7 +28,7 @@ public class JenkinsElasticSearchQuery {
         if (buildNumber != null) {
             queries.add(createQuery("metadata.build_number", buildNumber));
         }
-        return new BoolQuery.Builder().should(queries).build()._toQuery();
+        return new BoolQuery.Builder().must(queries).build()._toQuery();
     }
 
     private static Query createQuery(String field, String value) {
